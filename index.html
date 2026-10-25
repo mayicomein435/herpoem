@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A Poem In Many Tongues</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Instrument+Sans:wght@400;500;600&family=Noto+Serif+Tamil:wght@400;500&family=Noto+Serif+Devanagari:wght@400;500&family=Noto+Naskh+Arabic:wght@400;500&display=swap">
+<style>
+/* Layout: one centred reading column; language chips above, the poem as two stanzas below, optional signature at the bottom. */
+:root {
+  --bg: #f4eff5;
+  --card: #fbf8fc;
+  --ink: #2a1f33;
+  --muted: #6d5f78;
+  --line: #ddd2e3;
+  --accent: #b0306a;
+  --accent-ink: #ffffff;
+  --accent-soft: #f0dbe6;
+  --font-display: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --font-ui: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17111d; --card: #211828; --ink: #f1e8f3; --muted: #b3a3bd; --line: #382a42;
+    --accent: #f08fb8; --accent-ink: #26101a; --accent-soft: #3a2233;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17111d; --card: #211828; --ink: #f1e8f3; --muted: #b3a3bd; --line: #382a42;
+  --accent: #f08fb8; --accent-ink: #26101a; --accent-soft: #3a2233;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-ui); font-size: 15px; line-height: 1.5;
+  min-height: 100vh;
+  padding-block: 40px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+.label { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.chip {
+  font: inherit; font-weight: 500; cursor: pointer; color: var(--ink); background: var(--card);
+  border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; min-height: 40px;
+}
+.chip:hover { border-color: var(--accent); }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+  padding: clamp(24px, 6vw, 44px); display: flex; flex-direction: column; gap: 28px;
+}
+.stanza { margin: 0; font-family: var(--font-display); font-size: clamp(22px, 5vw, 28px); line-height: 1.5; overflow-wrap: anywhere; }
+.stanza span { display: block; }
+.poem[lang="ta"] .stanza { font-family: "Noto Serif Tamil", var(--font-display), serif; font-size: clamp(19px, 4.4vw, 24px); }
+.poem[lang="hi"] .stanza { font-family: "Noto Serif Devanagari", var(--font-display), serif; }
+.poem[lang="ar"] .stanza { font-family: "Noto Naskh Arabic", var(--font-display), serif; line-height: 1.9; }
+.poem[lang="ja"] .stanza, .poem[lang="ko"] .stanza { line-height: 1.8; }
+.poem .stanza span { animation: rise 0.45s ease both; }
+.poem .stanza span:nth-child(2) { animation-delay: 0.06s; }
+.poem .stanza span:nth-child(3) { animation-delay: 0.12s; }
+.poem .stanza span:nth-child(4) { animation-delay: 0.18s; }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .poem .stanza span { animation: none; } }
+.from { font-family: var(--font-display); font-style: italic; color: var(--muted); font-size: 18px; margin: 0; }
+.from[hidden] { display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <span class="label">Read it in</span>
+    <div class="chips" id="chips"></div>
+  </div>
+  <article class="card">
+    <div class="poem" id="poem" lang="en-x-tamil"></div>
+    <p class="from" id="from" hidden></p>
+  </article>
+</div>
+
+<script>
+// Put your name here (for example "Rasul"). Leave it empty to hide the signature.
+var FROM = "";
+
+var POEMS = [
+  { id: "orig", name: "Original", lang: "ta-Latn", dir: "ltr", stanzas: [
+    ["Ayy yedakuda iduppula", "Yekachakka madippula", "Uchakattathuku pona", "Air-u la"],
+    ["Adi medu pallam paathu na", "Sokki pona gar uh la", "Thooki vechu thakka poren", "Ner-u la..."]
+  ]},
+  { id: "ta", name: "தமிழ்", lang: "ta", dir: "ltr", stanzas: [
+    ["அய் இடுப்புல", "ஏகச்சக்க மடிப்புல", "உச்சகட்டத்துக்கு போன", "ஏர்-உ ல"],
+    ["அடி மேடு பள்ளம் பாத்து நான்", "சொக்கி போனேன் கார்-உ ல", "தூக்கி வெச்சு தாக்க போறேன்", "நேர்-உ ல..."]
+  ]},
+  { id: "en", name: "English", lang: "en", dir: "ltr", stanzas: [
+    ["Oh, that waist of hers,", "and all those folds, so many,", "I climbed all the way to the peak,", "floating on air."],
+    ["Seeing those dips and curves,", "I fell under her spell, faint and dizzy.", "I will lift her up and care for her", "like a child, straight from the heart."]
+  ]},
+  { id: "hi", name: "हिन्दी", lang: "hi", dir: "ltr", stanzas: [
+    ["अरे, उसकी कमर,", "और वो ढेरों सिलवटें,", "मैं सबसे ऊँचे शिखर तक जा पहुँचा,", "हवा में उड़ता हुआ।"],
+    ["वो ऊँच-नीच देखकर", "मैं मोहित हुआ, चक्कर खा गया।", "उसे गोद में उठाकर सँभालूँगा,", "बच्चे की तरह, सच्चे दिल से।"]
+  ]},
+  { id: "es", name: "Español", lang: "es", dir: "ltr", stanzas: [
+    ["Ay, esa cintura suya,", "y tantos pliegues, tantos,", "subí hasta lo más alto,", "flotando en el aire."],
+    ["Al ver sus curvas,", "caí rendido, casi me desmayo.", "La levantaré en brazos y la cuidaré", "como a una niña, con el corazón en la mano."]
+  ]},
+  { id: "it", name: "Italiano", lang: "it", dir: "ltr", stanzas: [
+    ["Ahi, quella sua vita,", "e tutte quelle pieghe, tantissime,", "sono salito fino in cima,", "sospeso nell'aria."],
+    ["Vedendo le sue curve,", "sono rimasto incantato, quasi svenuto.", "La solleverò e mi prenderò cura di lei", "come di una bambina, con il cuore in mano."]
+  ]},
+  { id: "fr", name: "Français", lang: "fr", dir: "ltr", stanzas: [
+    ["Ah, sa taille,", "et tous ces plis, tant de plis,", "je suis monté tout là-haut,", "porté par l'air."],
+    ["À voir ses courbes,", "je me suis laissé ensorceler, pris de vertige.", "Je la soulèverai et prendrai soin d'elle", "comme d'une enfant, du fond du cœur."]
+  ]},
+  { id: "de", name: "Deutsch", lang: "de", dir: "ltr", stanzas: [
+    ["Ach, ihre Taille,", "und all diese Falten, so viele,", "ich bin ganz nach oben gestiegen,", "schwebend in der Luft."],
+    ["Beim Anblick ihrer Rundungen", "war ich verzaubert, fast ohnmächtig.", "Ich werde sie hochheben und für sie sorgen", "wie für ein Kind, von Herzen."]
+  ]},
+  { id: "ja", name: "日本語", lang: "ja", dir: "ltr", stanzas: [
+    ["ああ、彼女の腰、", "幾重にも重なるそのしなやかな曲線、", "僕は頂点まで昇りつめて、", "空に浮かんでいた。"],
+    ["その起伏を見ただけで", "心を奪われ、めまいがした。", "抱き上げて、子どものように", "大切に守るよ、まっすぐな心で。"]
+  ]},
+  { id: "ko", name: "한국어", lang: "ko", dir: "ltr", stanzas: [
+    ["아, 그녀의 허리,", "그 수많은 곡선의 주름,", "나는 가장 높은 곳까지 올라", "공중에 떠 있었어."],
+    ["그 굴곡을 보는 순간", "넋을 잃고 아찔해졌지.", "안아 올려서 아이처럼", "소중히 돌볼게, 진심으로."]
+  ]},
+  { id: "ar", name: "العربية", lang: "ar", dir: "rtl", stanzas: [
+    ["آه من خصرها،", "وتلك الثنايا الكثيرة،", "صعدتُ إلى القمة،", "محلّقًا في الهواء."],
+    ["حين رأيتُ منحنياتها", "سُحرتُ وكدتُ أُغشى عليّ.", "سأحملها وأعتني بها", "كطفلة، من أعماق قلبي."]
+  ]}
+];
+
+var chips = document.getElementById("chips");
+var poem = document.getElementById("poem");
+var from = document.getElementById("from");
+
+function show(id) {
+  var p = POEMS.filter(function (x) { return x.id === id; })[0] || POEMS[0];
+  poem.setAttribute("lang", p.lang);
+  poem.setAttribute("dir", p.dir);
+  poem.textContent = "";
+  p.stanzas.forEach(function (lines) {
+    var s = document.createElement("p");
+    s.className = "stanza";
+    lines.forEach(function (l) {
+      var sp = document.createElement("span");
+      sp.textContent = l;
+      s.appendChild(sp);
+    });
+    poem.appendChild(s);
+  });
+  Array.prototype.forEach.call(chips.children, function (c) {
+    c.setAttribute("aria-pressed", String(c.dataset.id === p.id));
+  });
+}
+
+POEMS.forEach(function (p) {
+  var b = document.createElement("button");
+  b.type = "button"; b.className = "chip"; b.dataset.id = p.id;
+  b.setAttribute("aria-pressed", "false");
+  b.setAttribute("lang", p.lang);
+  b.textContent = p.name;
+  b.addEventListener("click", function () { show(p.id); });
+  chips.appendChild(b);
+});
+
+if (FROM) { from.textContent = "— " + FROM; from.hidden = false; }
+show("orig");
+</script>
+</body>
+</html>
